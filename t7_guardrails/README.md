@@ -20,6 +20,8 @@ break it — and then protect it.
 - Build real-time streaming filters for sensitive data redaction
 - Understand the trade-offs and limitations of each guardrail layer
 
+### If the task in the main branch is hard for you, then switch to the `main-detailed` branch
+
 ---
 
 ## Task 1: System Prompt Hardening [t1/prompt_injection.py](t1/prompt_injection.py)
