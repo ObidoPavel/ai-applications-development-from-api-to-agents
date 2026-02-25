@@ -4,8 +4,8 @@ from typing import Any
 import requests
 
 from commons.constants import ANTHROPIC_ENDPOINT
-from t8_agent.task._models.message import Message
-from t8_agent.task._models.role import Role
+from commons.models.message import Message
+from commons.models.role import Role
 from t8_agent.task.agents._base import BaseAgent
 from t8_agent.task.tools.base import BaseTool
 
@@ -34,7 +34,7 @@ class AnthropicBasedAgent(BaseAgent):
         #    a. Get `content` blocks and `stop_reason`, print RESPONSE
         #    b. Extract text: first block where type == "text" (use next() with default None)
         #    c. Extract tool_use blocks: filter blocks where type == "tool_use"
-        #    d. Build `ai_response` as Message(role=Role.AI, content=text,
+        #    d. Build `ai_response` as Message(role=Role.ASSISTANT, content=text,
         #       tool_calls=content_blocks if tool_use_blocks else None)
         #    e. If `stop_reason == "tool_use"`:
         #       - Append `ai_response` to `messages`
@@ -49,7 +49,7 @@ class AnthropicBasedAgent(BaseAgent):
         # Walk the list with an index `i` (while loop):
         # - Role.TOOL: group consecutive TOOL messages into one user message:
         #   {"role": "user", "content": [{"type": "tool_result", "tool_use_id": ..., "content": ...}, ...]}
-        # - Role.AI: if msg.tool_calls is set use it as content (replays the full content blocks
+        # - Role.ASSISTANT: if msg.tool_calls is set use it as content (replays the full content blocks
         #   so Anthropic can correlate tool results), otherwise use msg.content as content
         # - Other roles: {"role": msg.role.value, "content": msg.content}
         # Return the resulting list

@@ -4,8 +4,8 @@ from typing import Any
 import requests
 
 from commons.constants import OPENAI_CHAT_COMPLETIONS_ENDPOINT
-from t8_agent.task._models.message import Message
-from t8_agent.task._models.role import Role
+from commons.models.message import Message
+from commons.models.role import Role
 from t8_agent.task.agents._base import BaseAgent
 from t8_agent.task.tools.base import BaseTool
 
@@ -33,7 +33,7 @@ class OpenAIBasedAgent(BaseAgent):
         # 6. On HTTP 200:
         #    a. Get `choices[0]`, print RESPONSE
         #    b. Extract `content` and `tool_calls` from `choices[0]["message"]`
-        #    c. Build `ai_response` as Message(role=Role.AI, content=..., tool_calls=...)
+        #    c. Build `ai_response` as Message(role=Role.ASSISTANT, content=..., tool_calls=...)
         #    d. If `finish_reason == "tool_calls"`:
         #       - Append `ai_response` to `messages`
         #       - Call `_process_tool_calls(tool_calls)` and extend `messages` with the result
