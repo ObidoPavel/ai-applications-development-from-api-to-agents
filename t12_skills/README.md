@@ -5,6 +5,8 @@ packaged as files (instructions, scripts, references). You will implement skill-
 OpenAI,
 and then build a **custom agent** that loads and executes skills entirely on your own infrastructure.
 
+### If the task in the main branch is hard for you, switch to the `main-detailed` branch
+
 ---
 
 ## Tasks
