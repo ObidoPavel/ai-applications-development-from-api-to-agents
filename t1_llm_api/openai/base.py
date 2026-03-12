@@ -27,8 +27,8 @@ class BaseOpenAIClient(AIClient, ABC):
         Raises:
             ValueError: If api_key is None, empty, or contains only whitespace.
         """
-        #TODO:
-        # Make validation for `api_key` (the same as in parent class)
-        # Call to __init__ of super class
-        # The `api_key` should be formatted according to Open AI specification
-        raise NotImplementedError
+        if not api_key or api_key.strip() == "":
+            raise ValueError("API key cannot be null or empty")
+
+        bearer_key = f"Bearer {api_key}" if not api_key.startswith("Bearer ") else api_key
+        super().__init__(endpoint, model_name, bearer_key, system_prompt)

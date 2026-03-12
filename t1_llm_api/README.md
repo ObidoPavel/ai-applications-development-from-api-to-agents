@@ -13,6 +13,8 @@ libraries we commonly use.
   - **Anthropic API Key** [Generate it here](https://platform.claude.com/settings/keys) and set up as environment variable with name `ANTHROPIC_API_KEY`
   - **Gemini API Key** [Generate it here](https://aistudio.google.com/app/api-keys) and set up as environment variable with name `GEMINI_API_KEY`
 
+**Quick setup:** Copy `.env.example` to `.env` in this folder, then replace the placeholder values with your keys. To use a single key for OpenAI-compatible and other models via [Open Router](https://openrouter.ai), see [OPENROUTER_KEYS.md](OPENROUTER_KEYS.md).
+
 ---
 
 ## Task:

@@ -1,7 +1,11 @@
 import asyncio
 
 from t1_llm_api.base_app import start
-from commons.constants import OPENAI_RESPONSES_ENDPOINT, OPENAI_API_KEY, DEFAULT_SYSTEM_PROMPT
+from t1_llm_api.constants import (
+    OPENAI_RESPONSES_ENDPOINT,
+    OPENAI_API_KEY,
+    DEFAULT_SYSTEM_PROMPT,
+)
 from t1_llm_api.openai.responses.client import OpenAIResponsesClient
 from t1_llm_api.openai.responses.custom_client import CustomOpenAIResponsesClient
 

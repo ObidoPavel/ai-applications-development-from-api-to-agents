@@ -19,69 +19,41 @@ class AnthropicAIClient(AIClient):
     """
 
     def __init__(self, endpoint: str, model_name: str, api_key: str, system_prompt: str):
-        """
-        Initialize the Anthropic client with SDK.
-
-        Args:
-            endpoint (str): The Anthropic API endpoint (for compatibility, not used by SDK).
-            model_name (str): The Claude model to use (e.g., 'claude-3-opus', 'claude-sonnet-4-5').
-            api_key (str): The Anthropic API key for authentication.
-            system_prompt (str): The system instruction to guide Claude's behavior.
-        """
-        #TODO:
-        # Call to __init__ of super class
-        # Add Anthropic and AsyncAnthropic clients https://github.com/anthropics/anthropic-sdk-python?tab=readme-ov-file#usage
-        # (In readme you can find samples with both of these clients)
-        # Useful links with request/response samples:
-        #   - https://docs.anthropic.com/en/api/overview
-        #   - https://docs.anthropic.com/en/api/messages
-        raise NotImplementedError
+        super().__init__(endpoint, model_name, api_key, system_prompt)
+        self._client = Anthropic(api_key=api_key)
+        self._async_client = AsyncAnthropic(api_key=api_key)
 
     def response(self, messages: list[Message], **kwargs) -> Message:
-        """
-        Get a synchronous response from Anthropic's Claude API.
-
-        Args:
-            messages (list[Message]): The conversation history.
-            **kwargs: Additional parameters like max_tokens (default: 1024).
-
-        Returns:
-            Message: The AI's response message.
-
-        Note:
-            Claude's API uses a separate 'system' parameter for system instructions.
-            Response content blocks are concatenated into a single text response.
-            The response is printed to stdout before being returned.
-        """
-        #TODO:
-        # - Add System prompt
-        # - Call client
-        # - Print response to console
-        # - Return ASSISTANT message
-        raise NotImplementedError
+        max_tokens = kwargs.get("max_tokens", 1024)
+        api_messages = [m.to_dict() for m in messages]
+        response = self._client.messages.create(
+            model=self._model_name,
+            max_tokens=max_tokens,
+            system=self._system_prompt,
+            messages=api_messages,
+        )
+        content = "".join(
+            block.text
+            for block in response.content
+            if hasattr(block, "text") and block.text
+        )
+        print(content)
+        return Message(Role.ASSISTANT, content)
 
     async def stream_response(self, messages: list[Message], **kwargs) -> Message:
-        """
-        Get a streaming response from Anthropic's Claude API.
-
-        The response is streamed using event-based streaming, with text deltas
-        printed immediately as they arrive.
-
-        Args:
-            messages (list[Message]): The conversation history.
-            **kwargs: Additional parameters like max_tokens (default: 1024).
-
-        Returns:
-            Message: The complete AI response message after all deltas are received.
-
-        Note:
-            Listens for 'content_block_delta' events with text deltas.
-            Each delta is printed to stdout as it arrives for real-time display.
-        """
-        #TODO:
-        # - Add System prompt
-        # - Call client with streaming mode
-        # - Handle stream with chunks
-        # - Print response to console
-        # - Return ASSISTANT message
-        raise NotImplementedError
+        max_tokens = kwargs.get("max_tokens", 1024)
+        api_messages = [m.to_dict() for m in messages]
+        parts: list[str] = []
+        async with self._async_client.messages.stream(
+            model=self._model_name,
+            max_tokens=max_tokens,
+            system=self._system_prompt,
+            messages=api_messages,
+        ) as stream:
+            async for event in stream:
+                if event.type == "content_block_delta":
+                    if hasattr(event, "delta") and event.delta.text:
+                        parts.append(event.delta.text)
+                        print(event.delta.text, end="", flush=True)
+        print()
+        return Message(Role.ASSISTANT, "".join(parts))

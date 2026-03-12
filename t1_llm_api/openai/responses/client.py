@@ -20,65 +20,34 @@ class OpenAIResponsesClient(BaseOpenAIClient):
     """
 
     def __init__(self, endpoint: str, model_name: str, system_prompt: str, api_key: str):
-        """
-        Initialize the OpenAI Responses client with SDK.
-
-        Args:
-            endpoint (str): The OpenAI API endpoint (for compatibility, not used by SDK).
-            model_name (str): The OpenAI model to use (e.g., 'gpt-5').
-            system_prompt (str): The instruction to guide the model's behavior.
-            api_key (str): The OpenAI API key for authentication.
-        """
-        #TODO:
-        # Call to __init__ of super class
-        # Add OpenAI and AsyncOpenAI clients https://github.com/openai/openai-python?tab=readme-ov-file#usage
-        # (In readme you can find samples with both of these clients)
-        raise NotImplementedError
+        super().__init__(endpoint, model_name, system_prompt, api_key)
+        raw_key = api_key.replace("Bearer ", "") if api_key.startswith("Bearer ") else api_key
+        self._client = OpenAI(api_key=raw_key)
+        self._async_client = AsyncOpenAI(api_key=raw_key)
 
     def response(self, messages: list[Message], **kwargs) -> Message:
-        """
-        Get a synchronous response from OpenAI's Responses API.
-
-        Args:
-            messages (list[Message]): The conversation history.
-            **kwargs: Additional parameters for the API (currently unused).
-
-        Returns:
-            Message: The AI's response message.
-
-        Note:
-            Uses the Responses API format with 'instructions' and 'input' parameters.
-            The response is printed to stdout before being returned.
-        """
-        #TODO:
-        # - Prepare input messages
-        # - Call client
-        # - Print response to console
-        # - Return ASSISTANT message
-        raise NotImplementedError
+        input_messages = [m.to_dict() for m in messages]
+        api_response = self._client.responses.create(
+            model=self._model_name,
+            input=input_messages,
+            instructions=self._system_prompt,
+        )
+        content = api_response.output_text or ""
+        print(content)
+        return Message(Role.ASSISTANT, content)
 
     async def stream_response(self, messages: list[Message], **kwargs) -> Message:
-        """
-        Get a streaming response from OpenAI's Responses API.
-
-        The response is streamed using event-based streaming, with each delta
-        printed immediately as it arrives.
-
-        Args:
-            messages (list[Message]): The conversation history.
-            **kwargs: Additional parameters for the API (currently unused).
-
-        Returns:
-            Message: The complete AI response message after all deltas are received.
-
-        Note:
-            Uses the Responses API streaming format with event types.
-            Listens for 'response.output_text.delta' events to build the response.
-        """
-        #TODO:
-        # - Prepare input messages
-        # - Call client with streaming mode
-        # - Handle stream with events
-        # - Print response to console
-        # - Return ASSISTANT message
-        raise NotImplementedError
+        input_messages = [m.to_dict() for m in messages]
+        parts: list[str] = []
+        with self._client.responses.stream(
+            model=self._model_name,
+            input=input_messages,
+            instructions=self._system_prompt,
+            stream=True,
+        ) as stream:
+            for event in stream:
+                if hasattr(event, "delta") and event.delta:
+                    parts.append(event.delta)
+                    print(event.delta, end="", flush=True)
+        print()
+        return Message(Role.ASSISTANT, "".join(parts))
