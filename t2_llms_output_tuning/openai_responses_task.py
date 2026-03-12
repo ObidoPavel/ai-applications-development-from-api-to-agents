@@ -1,3 +1,6 @@
+from t2_llms_output_tuning._env import load_dotenv
+
+load_dotenv()
 from t2_llms_output_tuning._clients.openai_responses_client import OpenAIResponsesClient
 from t2_llms_output_tuning._main import run
 
@@ -39,9 +42,39 @@ from t2_llms_output_tuning._main import run
 #  Query: "How many r's are in the word strawberry?"
 #  Try: reasoning={"effort": "high"} vs reasoning={"effort": "low"}
 
+_LANGUAGES_JSON_FORMAT = {
+    "format": {
+        "type": "json_schema",
+        "name": "languages",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {"name": {"type": "string"}, "year": {"type": "integer"}},
+                        "required": ["name", "year"],
+                        "additionalProperties": False,
+                    }
+                }
+            },
+            "required": ["languages"],
+            "additionalProperties": False,
+        },
+    }
+}
+
 run(
     client=OpenAIResponsesClient('gpt-5.2'),
-    print_request=True, # Switch to False if you do not want to see the request in console
-    print_only_content=False, # Switch to True if you want to see only content from response
-
+    print_request=True,  # Switch to False if you do not want to see the request in console
+    print_only_content=False,  # Switch to True if you want to see only content from response
+    temperature=1.0,
+    top_p=1.0,
+    max_output_tokens=1024,
+    text=_LANGUAGES_JSON_FORMAT,
+    truncation="disabled",
+    metadata=None,
+    reasoning={"effort": "medium"},
 )

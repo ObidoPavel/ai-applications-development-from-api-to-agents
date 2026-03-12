@@ -1,3 +1,6 @@
+from t2_llms_output_tuning._env import load_dotenv
+
+load_dotenv()
 from t2_llms_output_tuning._clients.openai_chat_completions_client import OpenAIChatCompletionsClient
 from t2_llms_output_tuning._main import run
 
@@ -55,10 +58,42 @@ from t2_llms_output_tuning._main import run
 #  Query: "How many r's are in the word strawberry?"
 #  Try: reasoning_effort="low" vs reasoning_effort="high"
 
+_LANGUAGES_JSON_SCHEMA = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "languages",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {"name": {"type": "string"}, "year": {"type": "integer"}},
+                        "required": ["name", "year"],
+                        "additionalProperties": False,
+                    }
+                }
+            },
+            "required": ["languages"],
+            "additionalProperties": False,
+        },
+    },
+}
+
 run(
     client=OpenAIChatCompletionsClient(model_name='gpt-5.2'),
-    print_request=True, # Switch to False if you do not want to see the request in console
-    print_only_content=False, # Switch to True if you want to see only content from response
-
-
+    print_request=True,  # Switch to False if you do not want to see the request in console
+    print_only_content=False,  # Switch to True if you want to see only content from response
+    n=1,
+    temperature=1.0,
+    top_p=1.0,
+    max_tokens=1024,
+    stop=None,
+    response_format=_LANGUAGES_JSON_SCHEMA,
+    frequency_penalty=0.0,
+    presence_penalty=0.0,
+    seed=None,
+    reasoning_effort="medium",
 )

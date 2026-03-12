@@ -1,3 +1,6 @@
+from t2_llms_output_tuning._env import load_dotenv
+
+load_dotenv()
 from t2_llms_output_tuning._clients.gemini_client import GeminiAIClient
 from t2_llms_output_tuning._main import run
 
@@ -34,10 +37,24 @@ from t2_llms_output_tuning._main import run
 #  Query: "How many r's are in the word strawberry?"
 #  Try: "thinkingConfig": {"thinkMode": "THINKING_MODE_ENABLED", "thinkBudget": 5000}
 
+_GEMINI_LANGUAGES_SCHEMA = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {"name": {"type": "string"}, "year": {"type": "integer"}},
+    },
+}
+
 run(
     client=GeminiAIClient('gemini-3-flash-preview'),
-    print_request=True, # Switch to False if you do not want to see the request in console
-    print_only_content=False, # Switch to True if you want to see only content from response
-
-
+    print_request=True,  # Switch to False if you do not want to see the request in console
+    print_only_content=False,  # Switch to True if you want to see only content from response
+    generationConfig={
+        "temperature": 1.0,
+        "topP": 0.95,
+        "topK": 40,
+        "maxOutputTokens": 1024,
+        "responseMimeType": "application/json",
+        "responseSchema": _GEMINI_LANGUAGES_SCHEMA,
+    },
 )

@@ -1,3 +1,6 @@
+from t2_llms_output_tuning._env import load_dotenv
+
+load_dotenv()
 from t2_llms_output_tuning._clients.anthropic_client import AnthropicAIClient
 from t2_llms_output_tuning._main import run
 
@@ -29,9 +32,36 @@ from t2_llms_output_tuning._main import run
 #  Query: "How many r's are in the word strawberry?"
 #  Try: thinking={"type": "enabled", "budget_tokens": 5000}, max_tokens=8000
 
+_ANTHROPIC_LANGUAGES_SCHEMA = {
+    "format": {
+        "type": "json_schema",
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {"name": {"type": "string"}, "year": {"type": "integer"}},
+                        "required": ["name", "year"],
+                    }
+                }
+            },
+            "required": ["languages"],
+        },
+    }
+}
+
 run(
     client=AnthropicAIClient('claude-sonnet-4-5'),
-    print_request=True, # Switch to False if you do not want to see the request in console
-    print_only_content=False, # Switch to True if you want to see only content from response
-
+    print_request=True,  # Switch to False if you do not want to see the request in console
+    print_only_content=False,  # Switch to True if you want to see only content from response
+    temperature=1.0,
+    top_p=1.0,
+    top_k=40,
+    stop_sequences=None,
+    output_config=_ANTHROPIC_LANGUAGES_SCHEMA,
+    max_tokens=1024,
 )
